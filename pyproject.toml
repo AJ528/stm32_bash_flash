@@ -1,0 +1,9 @@
+[project]
+name = "stm32pyflash"
+version = "0.0.1"
+description = ''
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+stm32pyflash = "flash:main"
