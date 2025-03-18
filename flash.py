@@ -3,8 +3,20 @@ import argparse
 import subprocess
 from pathlib import Path
 import tempfile
+import serial
+
 
 BAUD_RATE = 115200
+ser = serial.Serial(baudrate=BAUD_RATE, timeout=1)
+
+def serial_attempt_connect(ser_port):
+    ser.port = ser_port
+    print("Attempting to connect to serial port " + ser_port)
+    try:
+        ser.open()
+        print(ser_port + " is connected")
+    except (serial.SerialException):
+        raise IOError("Unable to connect. The device may be unplugged, another program may be using the COM port, or an incorrect COM port may have been given.")
 
 def run(args):
   with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
@@ -64,6 +76,12 @@ def main():
     reset_arg = ""
 
   print(f"device = {args.device_path}")
+
+  try:
+    serial_attempt_connect(args.device_path)
+    ser.write(b"update\r\n")
+  finally:
+    ser.close()
 
   if (args.action == "erase"):
     erase_MCU(args.device_path)
