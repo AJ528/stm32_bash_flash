@@ -56,13 +56,13 @@ def erase_MCU(device_path):
   erase_str = "stm32flash -b "+ str(BAUD_RATE) + " -o " + device_path
   run(erase_str.split())
 
-def flash_MCU(elf_path, reset_arg, device_path):
+def flash_MCU(elf_path, device_path):
   start_address = get_elf_start_addr(elf_path)
   print(f"start address is {start_address}")
   bin_file = create_binary(elf_path)
 
   flash_str = "stm32flash -b " + str(BAUD_RATE) + " -w " + str(bin_file) + \
-              " -v -f " + reset_arg + " -S " + start_address + " " + device_path
+              " -v -f -R -S " + start_address + " " + device_path
   run(flash_str.split())
   bin_file.unlink()
 
@@ -71,7 +71,6 @@ def parse_args():
   parser = argparse.ArgumentParser()
   parser.add_argument("action", help = "either \"erase\" or the path to an ELF file")
   parser.add_argument("-d", help = "set the device path (default = /dev/ttyUSB0)", dest = "device_path", default = "/dev/ttyUSB0")
-  parser.add_argument("-R", help = "reset device at exit", dest = "reset_device", action = 'store_true')
 
   args = parser.parse_args()
   return args
@@ -79,11 +78,6 @@ def parse_args():
 def main():
 
   args = parse_args()
-
-  if(args.reset_device):
-    reset_arg = "-R"
-  else:
-    reset_arg = ""
 
   print(f"device = {args.device_path}")
 
@@ -98,7 +92,7 @@ def main():
     erase_MCU(args.device_path)
   else:
     elf_path = Path(args.action).resolve(strict=True)
-    flash_MCU(elf_path, reset_arg, args.device_path)
+    flash_MCU(elf_path, args.device_path)
 
 
 if __name__ == "__main__":
