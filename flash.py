@@ -4,10 +4,12 @@ import subprocess
 from pathlib import Path
 import tempfile
 import serial
+import time
 
 
 BAUD_RATE = 115200
-ser = serial.Serial(baudrate=BAUD_RATE, timeout=1)
+SERIAL_DELAY = 0.05
+ser = serial.Serial(baudrate=BAUD_RATE, timeout=0.1)
 
 def serial_attempt_connect(ser_port):
     ser.port = ser_port
@@ -17,6 +19,14 @@ def serial_attempt_connect(ser_port):
         print(ser_port + " is connected")
     except (serial.SerialException):
         raise IOError("Unable to connect. The device may be unplugged, another program may be using the COM port, or an incorrect COM port may have been given.")
+
+def serial_tx(tx_str):
+  for char in tx_str:
+    byte_char = bytes(char.encode('utf8'))
+    ser.write(byte_char)
+    time.sleep(SERIAL_DELAY)
+    ser.read_all()
+
 
 def run(args):
   with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
@@ -79,7 +89,8 @@ def main():
 
   try:
     serial_attempt_connect(args.device_path)
-    ser.write(b"update\r\n")
+    time.sleep(SERIAL_DELAY)
+    serial_tx("\rupdate\r")
   finally:
     ser.close()
 
