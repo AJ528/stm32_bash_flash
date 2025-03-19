@@ -76,24 +76,26 @@ def parse_args():
   return args
 
 def main():
-
-  args = parse_args()
-
-  print(f"device = {args.device_path}")
-
   try:
-    serial_attempt_connect(args.device_path)
-    time.sleep(SERIAL_DELAY)
-    serial_tx("\rupdate\r")
-  finally:
-    ser.close()
+    args = parse_args()
+    if (args.action != "erase"):
+      elf_path = Path(args.action).resolve(strict=True)
 
-  if (args.action == "erase"):
-    erase_MCU(args.device_path)
-  else:
-    elf_path = Path(args.action).resolve(strict=True)
-    flash_MCU(elf_path, args.device_path)
+    print(f"device = {args.device_path}")
 
+    try:
+      serial_attempt_connect(args.device_path)
+      time.sleep(SERIAL_DELAY)
+      serial_tx("\rupdate\r")
+    finally:
+      ser.close()
+
+    if (args.action == "erase"):
+      erase_MCU(args.device_path)
+    else:
+      flash_MCU(elf_path, args.device_path)
+  except:
+    raise
 
 if __name__ == "__main__":
   main()
