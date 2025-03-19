@@ -1,9 +1,11 @@
 [project]
 name = "stm32pyflash"
-version = "0.0.1"
+version = "1.0.0"
 description = ''
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+  "pyserial"
+]
 
 [project.scripts]
 stm32pyflash = "flash:main"
