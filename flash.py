@@ -70,6 +70,7 @@ def parse_args():
   # Instantiate the parser
   parser = argparse.ArgumentParser()
   parser.add_argument("action", help = "either \"erase\" or the path to an ELF file")
+  parser.add_argument("-c", help = "assume the MCU is already in the bootloader", dest = "send_update_cmd", action = 'store_false')
   parser.add_argument("-d", help = "set the device path (default = /dev/ttyUSB0)", dest = "device_path", default = "/dev/ttyUSB0")
 
   args = parser.parse_args()
@@ -83,12 +84,13 @@ def main():
 
     print(f"device = {args.device_path}")
 
-    try:
-      serial_attempt_connect(args.device_path)
-      time.sleep(SERIAL_DELAY)
-      serial_tx("\rupdate\r")
-    finally:
-      ser.close()
+    if(args.send_update_cmd):
+      try:
+        serial_attempt_connect(args.device_path)
+        time.sleep(SERIAL_DELAY)
+        serial_tx("\rupdate\r")
+      finally:
+        ser.close()
 
     if (args.action == "erase"):
       erase_MCU(args.device_path)
